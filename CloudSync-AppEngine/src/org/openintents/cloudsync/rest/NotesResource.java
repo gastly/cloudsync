@@ -11,7 +11,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import org.openintents.cloudsync.server.CloudSyncService;
 import org.openintents.cloudsync.server.DataStore;
 import org.openintents.cloudsync.server.Task;
 
@@ -19,15 +21,16 @@ import com.sun.jersey.api.NotFoundException;
 
 @Path("/notes")
 public class NotesResource {
+	
+	CloudSyncService service = new CloudSyncService();
+	
 	@GET
 	@Path("/get")
 	@Produces("application/json")
 	public String get(@DefaultValue("-1") @QueryParam("_id") int id) {
-
-		DataStore ds = new DataStore();
-
+		
 		if (id == -1) { // No note _id specified, so fetch all notes
-			List<Task> notes = ds.findAll("org.openintents.notepad");
+			List<Task> notes = service.queryTasks(Util.NOTEPAD_PACKAGE_NAME);
 
 			// Combine all notes into one JSON string
 			// TODO: Find a better way to combine all notes
@@ -55,7 +58,7 @@ public class NotesResource {
 			ret = ret.concat("]");
 			return ret;
 		} else {
-			Task task = ds.find((long) id);
+			Task task = service.readTask((long) id);
 			if (task == null) {
 				throw new NotFoundException();
 			}
@@ -80,14 +83,59 @@ public class NotesResource {
 		}
 		
 		long id = Long.parseLong(_id);
-		DataStore ds = new DataStore();
 		
-		Task task = ds.find(id);
+		Task task = service.readTask(id);
 		String t = Util.appendJSON(task.getJsonStringData(), "title", title);
 		t = Util.appendJSON(t, "note", note);
 		task.setJsonStringData(t);
-		ds.update(task);
+		service.updateTask(task);
 		
 		return t;
+	}
+	
+	@GET
+	@Path("/delete")
+	@Produces("application/json")
+	public String delete(@DefaultValue("") @QueryParam("_id") String _id)
+	{
+		if(_id.isEmpty()) {
+			throw new NotFoundException();
+		}
+		
+		long id = Long.parseLong(_id);
+		
+		Task task = service.readTask(id);
+		if(task == null)
+			throw new NotFoundException();
+		if(!task.getEmailAddress().equalsIgnoreCase(DataStore.getUserEmail()))
+		{
+			throw new RequestException(Response.Status.FORBIDDEN);
+		}
+		
+		service.deleteTask(task);
+		
+		return "";
+	}
+	
+
+	@POST
+	@Path("/new")
+	@Produces("application/json")
+	public String newNote(@DefaultValue("") @FormParam("title") String title, 
+			@DefaultValue("") @FormParam("note") String note)
+	{
+		if(title.isEmpty())
+			throw new RequestException(Response.Status.BAD_REQUEST);
+		
+		Task task = service.createTask();
+		Note n = new Note();
+		n.title = title;
+		n.note = note;
+		n.created_date = n.modified_date = service.getAppEngineTime();
+		
+		task.setAppPackageName(Util.NOTEPAD_PACKAGE_NAME);
+		task.setJsonStringData(Util.toJSON(n));
+		service.updateTask(task);
+		return "";
 	}
 }

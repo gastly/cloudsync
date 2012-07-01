@@ -562,7 +562,7 @@ function updateNote(id)
 
 function deleteNote(id)
 {
-	$.getJSON('/notes/delete?id='+id, function(data) {
+	$.getJSON('/notes/delete?_id='+id, function(data) {
 		/*if(data.code != 200)
 		{
 			notify('Error deleting note: '+data['msg'], 'alert-error');
