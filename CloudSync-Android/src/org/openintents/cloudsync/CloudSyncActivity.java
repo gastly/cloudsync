@@ -16,28 +16,37 @@ package org.openintents.cloudsync;
 
 import org.openintents.cloudsync.client.MyRequestFactory;
 import org.openintents.cloudsync.client.MyRequestFactory.HelloWorldRequest;
+import org.openintents.cloudsync.shared.CloudSyncRequestFactory;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import com.google.web.bindery.requestfactory.shared.Receiver;
 import com.google.web.bindery.requestfactory.shared.ServerFailure;
+
 
 /**
  * Main activity - requests "Hello, World" messages from the server and provides
@@ -49,6 +58,7 @@ public class CloudSyncActivity extends Activity {
      */
     private static final String TAG = "CloudSyncActivity";
     private static final boolean debug = true;
+    private static Integer val;
 
     /**
      * The current context.
@@ -225,6 +235,9 @@ public class CloudSyncActivity extends Activity {
         	cloudMod.moveToNext();
         }
         
+        timeCur.close();
+        idmapCur.close();
+        cloudMod.close();
         
         //deleteAll.setVisibility(Button.INVISIBLE);
         deleteAll.setOnClickListener(new OnClickListener() {
@@ -286,13 +299,71 @@ public class CloudSyncActivity extends Activity {
         syncButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
             	helloWorld.setText("Syncing Process Started");
+            	
             	startSync();
             }
 			       
         });
     }
+    
+    public void purgeOnServer(View v) {
+    	if (debug) Log.i(TAG,"going to delete data on Server");
+    	if (debug) Log.d(TAG,"The caling package is:-> "+getCallingPackage());
+    	if(getCallingPackage()==null) {
+    		//TODO: it has to be checked whether the calling package is valid or not.
+    		final TextView helloWorld = (TextView) findViewById(R.id.hello_world);
+    		helloWorld.setText("Call me from OI Note to delete to Continue");
+    		return;
+    	}
+    	
+    	
+    	LayoutInflater layoutInflater = (LayoutInflater) getBaseContext()
+				.getSystemService(LAYOUT_INFLATER_SERVICE);
+		View popupView = layoutInflater.inflate(R.layout.pop_up, null);
+		final PopupWindow popupWindow = new PopupWindow(popupView,
+				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		
+		popupView.setBackgroundColor(Color.BLACK);
+		popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
+		
+		Button btnDismiss = (Button) popupView.findViewById(R.id.cancel);
+		final Button btnYes = (Button) popupView.findViewById(R.id.confirm);
+		final CheckBox checkb = (CheckBox) popupView.findViewById(R.id.ck_del);
+		checkb.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if(checkb.isChecked()==true) {
+					btnYes.setEnabled(true);	
+					}
+					else {
+						btnYes.setEnabled(false);
+					}
+				
+			}
+		});
+		
+		btnDismiss.setOnClickListener(new Button.OnClickListener() {
 
-    /**
+			@Override
+			public void onClick(View v) {
+				
+				popupWindow.dismiss();
+			}
+		});
+		
+		btnYes.setOnClickListener(new Button.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				popupWindow.dismiss();
+				purgeAllRecords();
+				
+			}
+		});
+    }
+		
+	/**
      * Sets the screen content based on the screen id.
      */
     private void setScreenContent(int screenId) {
@@ -308,18 +379,27 @@ public class CloudSyncActivity extends Activity {
     	
     	Bundle extras = getIntent().getExtras();
     	if (debug) Log.d(TAG,"intent notesyndemo"+getIntent().describeContents()+"and action is:"+getIntent().getAction());
+    	final TextView helloWorld = (TextView) findViewById(R.id.hello_world);
     	
     	String jsonData = "";
-    	
+
+    	String deleteData = "";
+
     	if(getIntent().getAction().equalsIgnoreCase("vincent.start")) {
     		// Get the client data 
+    		final Button syncButton = (Button) findViewById(R.id.sync_test);
+    		syncButton.setEnabled(false);
     		jsonData = extras.getString("data");
-    		AsyncTaskList atl = new AsyncTaskList(this);  
-        	
-            atl.execute(jsonData);
+    		deleteData = extras.getString("delete");
+    		if (debug) Log.d(TAG,"delteDta in Acitivity:-> "+deleteData);
+    		//AsyncTaskList atl = new AsyncTaskList(this);  
+    		//atl.execute(jsonData,deleteData);
+        	AsyncSync as = new AsyncSync(this);
+        	as.execute(new String[]{jsonData,deleteData});
+            
     	}
     	else {
-    		
+    		helloWorld.setText(" Call me from OI Note");
     	}
     	
 		
@@ -328,15 +408,52 @@ public class CloudSyncActivity extends Activity {
     void doneSyncing() {
     	final TextView helloWorld = (TextView) findViewById(R.id.hello_world);
     	final Button syncButton = (Button) findViewById(R.id.sync_test);
+    	syncButton.setEnabled(true);
     	helloWorld.setText("Finished!");
     	syncButton.setClickable(true);
 	}
 
-	public void sendResult(String result) {
+	public void sendResult(String[] result) {
 		
 		Intent i = new Intent();
-		i.putExtra("jsonData", result);
+		i.putExtra("jsonData", result[0]);
+		i.putExtra("delete", result[1]);
 		setResult(0,i);
 		finish();
 	}
+	
+	protected void purgeAllRecords() {
+		
+		final TextView helloWorld = (TextView) findViewById(R.id.hello_world);
+		helloWorld.setText("Deleting all the records from server");
+		// Use an AsyncTask to avoid blocking the UI thread
+		final CloudSyncRequestFactory deleteFactory = Util.getRequestFactory(this, CloudSyncRequestFactory.class);
+        new AsyncTask<Void, Void, String>() {
+            private String message;
+
+            @Override
+            protected String doInBackground(Void... arg0) {
+            	deleteFactory.taskRequest().deleteAll(getCallingPackage()).fire(new Receiver<Integer>() {
+
+        			@Override
+        			public void onSuccess(Integer deleteRowCount) {
+        				val=deleteRowCount;
+        			
+        			}
+            	});
+            	message = val.toString();
+                return message;
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+            	helloWorld.setText("Done! Number of entries deleted is: "+val);
+            }
+        }.execute();
+    	
+    	
+    	
+	}
+
+	
 }
