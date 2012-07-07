@@ -1,0 +1,3 @@
+[submodule "CloudSync-AppEngine/war/interface"]
+	path = CloudSync-AppEngine/war/interface
+	url = git://github.com/gastly/webinterface
