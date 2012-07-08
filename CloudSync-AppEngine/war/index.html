@@ -1,48 +1,65 @@
-<!doctype html>
-<!-- The DOCTYPE declaration above will set the    -->
-<!-- browser's rendering engine into               -->
-<!-- "Standards Mode". Replacing this declaration  -->
-<!-- with a "Quirks Mode" doctype may lead to some -->
-<!-- differences in layout.                        -->
-
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<head>
+		<title>OI Cloud Sync</title>
+		<link rel="stylesheet" href="css/bootstrap.min.css" type="text/css"/>
+		<link rel="stylesheet" href="css/bootstrap-responsive.min.css" type="text/css"/>
+		<link rel="stylesheet" href="style.css" type="text/css"/>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
+		<script src="js/bootstrap.min.js" type="text/javascript"> </script>
+		<script type="text/javascript">
+			var tickerStack;
+			$(document).ready(function() {
+				tickerStack = $.makeArray($('#ticker').children('li'));
+				$.each(tickerStack, function(i,v) { $(v).hide(); });
+				$(tickerStack[0]).show();
+				setInterval(function(){ tick () }, 5000);
+			});
+			
+			function tick(){
+				element = tickerStack.shift();
+				$(element).fadeOut(function() { 
+					tickerStack.push(element);
+					$(tickerStack[0]).show();
+				});
+				
+			}
+			
 
-    <!--                                                               -->
-    <!-- Consider inlining CSS to reduce the number of requested files -->
-    <!--                                                               -->
-    <link type="text/css" rel="stylesheet" href="CloudSync.css">
+		</script>
+	</head>
 
-    <!--                                           -->
-    <!-- Any title is fine                         -->
-    <!--                                           -->
-    <title>CloudSync</title>
+	<body>
+		<div id="navbar" class="navbar">
+		    <div class="navbar-inner">
+		        <div class="container">
+			    <a class="brand" href="#">OI Cloud Sync</a>
+			    <span class="pull-right">
+			    	<a href="interface/" class="btn btn-success">Login</a>
+			    </span>
+		        </div>
+		    </div>
+	        </div>
 
-    <!--                                           -->
-    <!-- This script loads your compiled module.   -->
-    <!-- If you add any GWT meta tags, they must   -->
-    <!-- be added before this line.                -->
-    <!--                                           -->
-    <script type="text/javascript" language="javascript" src="cloudsync/cloudsync.nocache.js"></script>
-  </head>
+		<div class="container">
+				<header id="intro">
+					<div class="inner">
+						<h1>OpenIntents Cloud Sync</h1>
+						<ul id="ticker">
+							<li>Sync your Android device to the cloud</li>
+							<li>Store your OpenIntents application data on the cloud</li>
+							<li>Access your data from anywhere, anytime!</li>
+							<li>Sync your OI Notepad notes to multiple devices</li>
+						</ul>
+						<a href="interface/" class="btn btn-large btn-success">Login</a>
+					</div> <!-- .inner -->
+				</header> <!-- #intro -->
+			</div>
+		</div>	
+		
+		<footer id="footer" class="navbar navbar-fixed-bottom">
+			    <p>&copy; 2012 OpenIntents</p>
+	        </footer>
 
-  <!--                                           -->
-  <!-- The body can have arbitrary html, or      -->
-  <!-- you can leave the body empty if you want  -->
-  <!-- to create a completely dynamic UI.        -->
-  <!--                                           -->
-  <body>
-
-    <!-- OPTIONAL: include this if you want history support -->
-    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
-
-    <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
-    <noscript>
-      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
-        Your web browser must have JavaScript enabled
-        in order for this application to display correctly.
-      </div>
-    </noscript>
-  </body>
+	</body>
 </html>

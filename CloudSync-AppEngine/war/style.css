@@ -1,0 +1,40 @@
+body {
+	background-color: #f8f8f8;
+}
+
+.navbar .navbar-inner {
+	border-radius: 0px;
+}
+
+#intro {
+	margin-top: 7em;
+	text-align: center;
+}
+
+#intro h1 {
+	font-size: 4em;
+	font-weight: bold;
+	margin-bottom: 1em;
+}
+
+#ticker {
+	list-style: none;
+	margin: 3em 0;
+}
+
+#ticker li {
+	font-style: italic;
+	font-size: 18px;
+	/*font-weight: bold;*/
+}
+
+#footer {
+	padding: 3px 3px 0;
+	color: #fff;
+	background-color: #2C2C2C;
+}
+
+#footer p {
+	margin: 0;
+	padding: 0;
+}

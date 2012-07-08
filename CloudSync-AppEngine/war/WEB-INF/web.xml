@@ -46,7 +46,7 @@
   
   <!-- Default page to serve -->
   <welcome-file-list>
-    <welcome-file>CloudSync.html</welcome-file>
+    <welcome-file>index.html</welcome-file>
   </welcome-file-list>
 
   <!-- RequestFactory Servlet -->
@@ -86,7 +86,7 @@
   <!--  Require user login for the .html welcome page -->
   <security-constraint>
     <web-resource-collection>
-      <url-pattern>/*</url-pattern>
+      <url-pattern>/interface/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>
       <role-name>*</role-name>
