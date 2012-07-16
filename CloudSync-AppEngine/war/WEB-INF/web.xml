@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8" standalone="no"?><!--
     Copyright 2011 Google Inc. All Rights Reserved.
 
     All rights reserved. This program and the accompanying materials
@@ -12,12 +11,7 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
--->
-<web-app xmlns:xsi="http://www.w3.org/2001/xmlschema-instance"
-    xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-    xsi:schemalocation="http://java.sun.com/xml/ns/javaee
-                        http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-    version="2.5">
+--><web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xmlns:xsi="http://www.w3.org/2001/xmlschema-instance" version="2.5" xsi:schemalocation="http://java.sun.com/xml/ns/javaee                         http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 
     <init-param>
       <!-- speed up initial Jersey loading by deactivating WADL -->
@@ -103,5 +97,19 @@
       <role-name>admin</role-name>
     </auth-constraint>
   </security-constraint>
+
+  <servlet>
+    <servlet-name>SystemServiceServlet</servlet-name>
+    <servlet-class>com.google.api.server.spi.SystemServiceServlet</servlet-class>
+    <init-param>
+      <param-name>services</param-name>
+      <param-value/>
+    </init-param>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>SystemServiceServlet</servlet-name>
+    <url-pattern>/_ah/spi/*</url-pattern>
+  </servlet-mapping>
 
 </web-app>
