@@ -108,13 +108,19 @@ body {
 
 #footer {
 	margin-top: 1em;
-	padding: 6px 0;
+	padding: 6px;
 	color: #fff;
 	background-color: #2C2C2C;
-	width: 100%;
 }
 
 #footer p {
 	margin: 0;
 	padding: 0;
+}
+
+@media (max-width: 767px) {
+	#footer {
+		margin-left: -20px;
+		margin-right: -20px;
+	}
 }
