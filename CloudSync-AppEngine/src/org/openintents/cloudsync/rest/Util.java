@@ -7,6 +7,7 @@ import com.google.gson.JsonParser;
 public class Util {
 	
 	public static String NOTEPAD_PACKAGE_NAME = "org.openintents.notepad";
+	public static String SHOPPINGLIST_PACKAGE_NAME = "org.openintents.shoppinglist";
 	
 	public static String appendJSON(String jsonString, String name, Long data)
 	{

@@ -44,6 +44,11 @@ public class RequestException extends WebApplicationException
     	super(Response.status(code).type(MediaType.APPLICATION_JSON).build());
     }
     
+    public RequestException(int code)
+    {
+    	super(code);
+    }
+    
     public List<String> getErrors()
     {
         return errors;
